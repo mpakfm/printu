@@ -4,7 +4,7 @@ namespace Mpakfm;
  * Simple Logger
  * @author mpakfm <mpakfm@google.com>
  * @package \Mpakfm\Printu
- * @version 1.0.0
+ * @version 1.0.1
  */
 class Printu {
 	/**
@@ -12,7 +12,7 @@ class Printu {
 	 * return: 
 	 *		true - return string
 	 *		file - print into file /mpakfm/log/($file)
-	 *		ajax - print in plain text
+	 *		text|ajax - print in plain text
 	 *		false - print in html
 	 * @param mixed $obj
 	 * @param string $title
@@ -29,6 +29,7 @@ class Printu {
 		if ($return===true)
 			return $string;
 		elseif ($return == 'file') {
+			if (!isset($_SERVER['DOCUMENT_ROOT'])) return false;
 			$path = $_SERVER['DOCUMENT_ROOT'].'/mpakfm/log/';
 			if (!file_exists($_SERVER['DOCUMENT_ROOT'].'/mpakfm/')) {
 				mkdir($_SERVER['DOCUMENT_ROOT'].'/mpakfm',0744,true);
@@ -42,7 +43,7 @@ class Printu {
 				return $path.$file;
 			}
 		}
-		elseif ($return=='ajax')
+		elseif ($return=='text' || $return=='ajax')
 			echo $string;
 		else
 			echo '<div align="left" style="color: #000; text-align:left; background-color:#FFFAFA; border: 1px solid silver; margin: 10px 10px 10px 10px; padding: 10px 10px 10px 10px;">',$title == '' ? '': "<b>$title:&nbsp;</b>", nl2br(str_replace(array(' ','<','>'),array('&nbsp;','&lt;','&gt;'),print_r($obj,true))),'</div>';
