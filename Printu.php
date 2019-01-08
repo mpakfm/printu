@@ -4,7 +4,7 @@ namespace Mpakfm;
  * Simple Logger
  * @author mpakfm <mpakfm@google.com>
  * @package \Mpakfm\Printu
- * @version 1.0.1
+ * @version 1.0.2
  */
 class Printu {
 	/**
@@ -24,8 +24,7 @@ class Printu {
 		if ($obj===true) $obj = 'TRUE (bool)';
 		if ($obj===false) $obj = 'FALSE (bool)';
 		if ($obj===NULL) $obj = 'NULL';
-		$string = ($title == '' ? '': "$title: ") .print_r($obj, true)."\n";
-		
+		$string = ($title == '' ? '': "$title: ") .print_r($obj, true)."\n";		
 		if ($return===true)
 			return $string;
 		elseif ($return == 'file') {
