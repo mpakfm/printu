@@ -4,7 +4,7 @@ namespace Mpakfm;
  * Simple Logger
  * @author mpakfm <mpakfm@google.com>
  * @package \Mpakfm\Printu
- * @version 1.0.2
+ * @version 1.0.3
  */
 class Printu {
 	/**
@@ -31,10 +31,10 @@ class Printu {
 			if (!isset($_SERVER['DOCUMENT_ROOT'])) return false;
 			$path = $_SERVER['DOCUMENT_ROOT'].'/mpakfm/log/';
 			if (!file_exists($_SERVER['DOCUMENT_ROOT'].'/mpakfm/')) {
-				mkdir($_SERVER['DOCUMENT_ROOT'].'/mpakfm',0744,true);
+				mkdir($_SERVER['DOCUMENT_ROOT'].'/mpakfm',0754,true);
 			}
 			if (!file_exists($_SERVER['DOCUMENT_ROOT'].'/mpakfm/log')) {
-				mkdir($_SERVER['DOCUMENT_ROOT'].'/mpakfm/log',0744,true);
+				mkdir($_SERVER['DOCUMENT_ROOT'].'/mpakfm/log',0754,true);
 			}
 			if (file_exists($path)) {
 				if (!$file) $file = 'info.log';
