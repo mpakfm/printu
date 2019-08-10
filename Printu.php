@@ -3,7 +3,7 @@
  * Simple Logger
  * @author mpakfm <mpakfm@google.com>
  * @package \Mpakfm\Printu
- * @version 1.1.0
+ * @version 1.1.3
  */
 
 namespace Mpakfm;
