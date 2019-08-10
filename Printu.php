@@ -45,12 +45,21 @@ class Printu {
      * @param string $file
      * @return mixed (string | boolean | void)
      */
-    public static function log($obj, string $title='', $return=false, string $file=false) {
-        if ($obj===true) $obj = 'TRUE (bool)';
-        if ($obj===false) $obj = 'FALSE (bool)';
-        if ($obj===NULL) $obj = 'NULL';
+    public static function log($obj, string $title='', $return=null, string $file=null) {
+        if ($obj === true) {
+            $obj = 'TRUE (bool)';
+        }
+        if ($obj === false) {
+            $obj = 'FALSE (bool)';
+        }
+        if (is_null($obj)) {
+            $obj = 'NULL';
+        }
+        if (is_string($obj) && $obj == '') {
+            $obj = 'EMPTY LINE (string)';
+        }
         $string = ($title == '' ? '': "$title: ") .print_r($obj, true)."\n";		
-        if ($return===true) {
+        if ($return === true) {
             return $string;
         } elseif ($return == 'file') {
             if (!$file) {
@@ -58,15 +67,15 @@ class Printu {
             }
             $filePath = static::$logPath . DIRECTORY_SEPARATOR . $file;
             if (static::$logPath) {
-                $res = file_put_contents($filePath, $string, FILE_APPEND);
+                file_put_contents($filePath, $string, FILE_APPEND);
                 return $filePath;
             } else {
                 throw new \Exception ('Printu cannot create this log file: ' . $filePath . '. You need check var $pathToLogFolder ("' . static::$logPath . '") in init line: \Mpakfm\Printu::setPath($pathToLogFolder).');
             }
-        } elseif ($return=='text' || $return=='ajax') {
+        } elseif ($return == 'text' || $return == 'ajax') {
             echo $string;
         } else {
-            echo '<div align="left" style="color: #000; text-align:left; background-color:#FFFAFA; border: 1px solid silver; margin: 10px 10px 10px 10px; padding: 10px 10px 10px 10px;">',$title == '' ? '': "<b>$title:&nbsp;</b>", nl2br(str_replace(array(' ','<','>'),array('&nbsp;','&lt;','&gt;'),print_r($obj,true))),'</div>';
+            echo '<div align="left" style="color: #000; text-align:left; background-color:#FFFAFA; border: 1px solid silver; margin: 10px 10px 10px 10px; padding: 10px 10px 10px 10px;">',$title == '' ? '': "<b>{$title}:&nbsp;</b>", nl2br(str_replace([' ','<','>'], ['&nbsp;','&lt;','&gt;'], print_r($obj,true))),'</div>';
         }
     }
 }
