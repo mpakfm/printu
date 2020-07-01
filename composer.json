@@ -1,7 +1,7 @@
 {
     "name": "mpakfm/printu",
     "description": "Simple logger.",
-    "version": "1.2",
+    "version": "1.2.1",
 	"require":{
         "php":">=7.0.0"
     },
