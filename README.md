@@ -1,7 +1,42 @@
 # printu
 # Simple Logger
 
-version 1.2
+**version 1.2.2**
+
+Response types:
+* var - return as a string variable
+* file - print in the log file as plain text, **set as default now**
+* text - print in STDOUT as plain text
+* html - print in STDOUT as html
+
+Default response type is "file"
+
+You can change default response type by this method:
+
+```php
+public static function setDefaultResponse(string $response): bool {}
+```
+
+Set path to save log files:
+
+```php
+public static function setPath(string $path=''): bool {}
+```
+
+For example:
+
+some index.php 
+```php
+Printu::setPath(__DIR__.'/var/log');
+Printu::setDefaultResponse('html');
+```
+
+some some.php
+```php
+Printu::obj($_POST)->title('POST');
+```
+
+**version 1.2**
 
 New samples:
 ```php

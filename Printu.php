@@ -11,10 +11,23 @@ namespace Mpakfm;
 class Printu {
 
     /**
-     * Path to log folder
+     * Path to the log folder
      * @var string
      */
     public static $logPath;
+
+    /**
+     * Default type of the log response
+     * @var string
+     */
+    private static $defaultResponse = 'file';
+
+    public static $responseTypes = [
+        'var',
+        'file',
+        'text',
+        'html',
+    ];
 
     /**
      * @var mixed
@@ -26,9 +39,9 @@ class Printu {
     private $title;
 
     /**
-     * @var mixed
+     * @var string
      */
-    private $response = 'text';
+    private $response;
 
     /**
      * @var \DateTime
@@ -39,6 +52,11 @@ class Printu {
      * @var string
      */
     private $dtFormat = 'd.m H:i:s';
+
+    /**
+     * @var bool
+     */
+    private $isShowed = false;
 
     /**
      * @var string
@@ -61,6 +79,13 @@ class Printu {
         $this->obj = $obj;
     }
 
+    public function __destruct() {
+        if ($this->isShowed) {
+            return;
+        }
+        $this->show();
+    }
+
     public function title(string $title) {
         $this->title = $title;
         return $this;
@@ -80,10 +105,10 @@ class Printu {
         return $this;
     }
 
-    /**
-     * @param $response mixed
-     */
-    public function response($response) {
+    public function response(string $response) {
+        if (!in_array($response, static::$responseTypes)) {
+            throw new \Exception('Unknown response type: ' . $response . '. Try one of this: ' . implode(', ', static::$responseTypes));
+        }
         $this->response = $response;
         return $this;
     }
@@ -100,6 +125,10 @@ class Printu {
      * @throws \Exception
      */
     public function show() {
+        if ($this->isShowed) {
+            return;
+        }
+        $this->isShowed = true;
         $string = '';
         if ($this->dt) {
             $string .= $this->dt->format($this->dtFormat)."\t";
@@ -108,28 +137,31 @@ class Printu {
             $string .= ($this->title == '' ? '': "{$this->title}: ");
         }
         $string .= print_r($this->obj, true)."\n";
-        if ($this->response === true) {
-            return $string;
-        } else {
-            switch ($this->response) {
-                case"file":
-                    if (!$this->file) {
-                        $this->file = 'info.log';
-                    }
-                    $filePath = static::$logPath . DIRECTORY_SEPARATOR . $this->file;
-                    if (static::$logPath) {
-                        file_put_contents($filePath, $string, FILE_APPEND);
-                        return $filePath;
-                    } else {
-                        throw new \Exception ('Printu cannot create this log file: ' . $filePath . '. You need check var $pathToLogFolder ("' . static::$logPath . '") in init line: \Mpakfm\Printu::setPath($pathToLogFolder).');
-                    }
-                    break;
-                case"text":
-                    echo $string;
-                    break;
-                default:
-                    echo '<div style="color: #000; text-align:left; background-color:#FFFAFA; border: 1px solid silver; margin: 10px 10px 10px 10px; padding: 10px 10px 10px 10px;">',$this->title == '' ? '': "<b>{$this->title}:&nbsp;</b>", nl2br(str_replace([' ','<','>'], ['&nbsp;','&lt;','&gt;'], print_r($this->obj,true))),'</div>';
-            }
+        if (!$this->response) {
+            $this->response = static::$defaultResponse;
+        }
+        switch ($this->response) {
+            case"var":
+                return $string;
+                break;
+            case"file":
+                if (!$this->file) {
+                    $this->file = 'info.log';
+                }
+                $filePath = static::$logPath . DIRECTORY_SEPARATOR . $this->file;
+                if (static::$logPath) {
+                    file_put_contents($filePath, $string, FILE_APPEND);
+                    return $filePath;
+                } else {
+                    throw new \Exception ('Printu cannot create this log file: ' . $filePath . '. You need check var $pathToLogFolder ("' . static::$logPath . '") in init line: \Mpakfm\Printu::setPath($pathToLogFolder).');
+                }
+                break;
+            case"text":
+                echo $string;
+                break;
+            case"html":
+                echo '<div style="color: #000; text-align:left; background-color:#FFFAFA; border: 1px solid silver; margin: 10px 10px 10px 10px; padding: 10px 10px 10px 10px;">',$this->title == '' ? '': "<b>{$this->title}:&nbsp;</b>", nl2br(str_replace([' ','<','>'], ['&nbsp;','&lt;','&gt;'], print_r($this->obj,true))),'</div>';
+                break;
         }
     }
 
@@ -149,6 +181,14 @@ class Printu {
         return true;
     }
 
+    public static function setDefaultResponse(string $response): bool {
+        if (!in_array($response, static::$responseTypes)) {
+            throw new \Exception('Unknown response type: ' . $response . '. Try one of this: ' . implode(', ', static::$responseTypes));
+        }
+        static::$defaultResponse = $response;
+        return true;
+    }
+
     public static function obj($obj): Printu {
         return new self($obj);
     }
@@ -160,6 +200,7 @@ class Printu {
      *      file - print into file: static::$logPath . '/{$file}'
      *      text|ajax - print in plain text
      *      false - print in html
+     * @deprecated deprecated since version 1.2.2
      * @param mixed $obj
      * @param string $title
      * @param string $return
