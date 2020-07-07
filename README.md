@@ -1,6 +1,11 @@
 # printu
 # Simple Logger
 
+**version 1.2.3**
+
+* bug-fix in method show()
+* add method error() for default set datetime and file error.log
+
 **version 1.2.2**
 
 Response types:

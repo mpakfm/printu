@@ -121,6 +121,13 @@ class Printu {
         return $this;
     }
 
+    public function error(string $title) {
+        $this->title($title);
+        $this->dt();
+        $this->file('error');
+        return $this;
+    }
+
     /**
      * @throws \Exception
      */
@@ -136,15 +143,17 @@ class Printu {
         if ($this->title) {
             $string .= ($this->title == '' ? '': "{$this->title}: ");
         }
-        $string .= print_r($this->obj, true)."\n";
+
         if (!$this->response) {
             $this->response = static::$defaultResponse;
         }
         switch ($this->response) {
             case"var":
+                $string .= print_r($this->obj, true)."\n";
                 return $string;
                 break;
             case"file":
+                $string .= print_r($this->obj, true)."\n";
                 if (!$this->file) {
                     $this->file = 'info.log';
                 }
@@ -157,10 +166,16 @@ class Printu {
                 }
                 break;
             case"text":
+                $string .= print_r($this->obj, true)."\n";
                 echo $string;
                 break;
             case"html":
-                echo '<div style="color: #000; text-align:left; background-color:#FFFAFA; border: 1px solid silver; margin: 10px 10px 10px 10px; padding: 10px 10px 10px 10px;">',$this->title == '' ? '': "<b>{$this->title}:&nbsp;</b>", nl2br(str_replace([' ','<','>'], ['&nbsp;','&lt;','&gt;'], print_r($this->obj,true))),'</div>';
+                if ($this->title != '') {
+                    $string = str_replace($this->title . ':', "<b>{$this->title}:&nbsp;</b>", $string);
+                }
+                $string .= nl2br(str_replace([' ','<','>'], ['&nbsp;','&lt;','&gt;'], print_r($this->obj,true)));
+                $string = str_replace("\t", '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;', $string);
+                echo '<div style="color: #000; text-align:left; background-color:#FFFAFA; border: 1px solid silver; margin: 10px 10px 10px 10px; padding: 10px 10px 10px 10px;">',$string ,'</div>';
                 break;
         }
     }
