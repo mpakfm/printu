@@ -1,6 +1,91 @@
 # printu
 # Simple Logger
 
+**version 2.0.0**
+
+* add log levels: [debug, info, warning, alert]
+* add notifications (email)
+
+Configuration:
+```php
+Printu::setConfNotifier([
+    'warning' => 'email',
+    'alert'   => 'email',
+]);
+Printu::setConfChannel([
+    'email' => ['some@email.com', 'another@email.com']
+]);
+Printu::$fromNotifier = 'no-reply@server';
+Printu::$subjNotifier = 'Some project';
+```
+Usage:
+```php
+$var = ['asd', 'fgh'];
+Printu::debug($var);
+Printu::info($var)->title('INFO $var');
+Printu::warning($var)->title('WARNING $var');
+Printu::alert($var)->title('ALERT $var'); 
+```
+Log files:
+
+debug.log
+```text
+Array
+(
+    [0] => asd
+    [1] => fgh
+)
+```
+info.log
+```text
+24.05 18:54:35	INFO $var: Array
+(
+    [0] => asd
+    [1] => fgh
+)
+```
+warning.log
+```text
+24.05 18:54:35	WARNING $var: Array
+(
+    [0] => asd
+    [1] => fgh
+)
+```
+alert.log
+```text
+24.05 18:55:35	ALERT $var: Array
+(
+    [0] => asd
+    [1] => fgh
+)
+```
+email subject:
+```text
+{Printu::$subjNotifier} {level} {title}:
+```
+email example:
+```text
+From hp440 Tue May 24 19:13:42 2022
+Return-Path: <hp440>
+Received: (from hp440@localhost)
+	by hp440 (8.15.2/8.15.2/Submit) id 24OGDgaT3370909;
+	Tue, 24 May 2022 19:13:42 +0300
+Date: Tue, 24 May 2022 19:13:42 +0300
+Message-Id: <202205241613.24OGDgaT3370909@hp440>
+To: some@email.com
+Subject: Some project warning WARNING $var
+From: no-reply@server
+X-Mailer: PHP/7.4.29
+
+24.05 19:12:42	WARNING $var: Array
+(
+    [0] => asd
+    [1] => fgh
+)
+
+```
+
 **version 1.2.3**
 
 * bug-fix in method show()

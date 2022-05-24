@@ -16,12 +16,32 @@ class Printu {
      */
     public static $logPath;
 
+    /** @var array */
+    public static $confNotifier = [
+        'debug'   => null,
+        'info'    => null,
+        'warning' => null,
+        'alert'   => null,
+    ];
+
+    /** @var string */
+    public static $fromNotifier = 'PrintuLogger';
+    /** @var string */
+    public static $subjNotifier = 'LOGGER';
+
+    /** @var array */
+    public static $confChannel;
+
+    /** @var array */
+    public static $availableChannel = ['email'];
+
     /**
      * Default type of the log response
      * @var string
      */
     private static $defaultResponse = 'file';
 
+    /** @var array */
     public static $responseTypes = [
         'var',
         'file',
@@ -29,38 +49,28 @@ class Printu {
         'html',
     ];
 
-    /**
-     * @var mixed
-     */
+    /** @var string */
+    protected $level;
+
+    /** @var mixed */
     private $obj;
-    /**
-     * @var string
-     */
+
+    /** @var string */
     private $title;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $response;
 
-    /**
-     * @var \DateTime
-     */
+    /** @var \DateTime */
     private $dt;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     private $dtFormat = 'd.m H:i:s';
 
-    /**
-     * @var bool
-     */
+    /** @var bool */
     private $isShowed = false;
 
-    /**
-     * @var string
-     */
+    /** @var string */
     public $file;
 
     public function __construct($obj) {
@@ -105,6 +115,13 @@ class Printu {
         return $this;
     }
 
+    /**
+     * Types of response:
+     *      var     return the variable
+     *      file    write in file
+     *      text    write in STD_OUTPUT like text
+     *      html    write in STD_OUTPUT like html
+     */
     public function response(string $response) {
         if (!in_array($response, static::$responseTypes)) {
             throw new \Exception('Unknown response type: ' . $response . '. Try one of this: ' . implode(', ', static::$responseTypes));
@@ -121,6 +138,9 @@ class Printu {
         return $this;
     }
 
+    /**
+     * @deprecated deprecated since version 2.0.0
+     */
     public function error(string $title) {
         $this->title($title);
         $this->dt();
@@ -147,6 +167,9 @@ class Printu {
         if (!$this->response) {
             $this->response = static::$defaultResponse;
         }
+
+        $this->notice($string);
+
         switch ($this->response) {
             case"var":
                 $string .= print_r($this->obj, true)."\n";
@@ -180,6 +203,28 @@ class Printu {
         }
     }
 
+    public function notice(string $string) {
+        if (!$this->level || !self::$confNotifier[$this->level]) {
+            return;
+        }
+        $channel = self::$confNotifier[$this->level];
+        if (!self::$confChannel[$channel]) {
+            return;
+        }
+        $method = "{$channel}Channel";
+        $this->$method($string);
+    }
+
+    public function emailChannel(string $string) {
+        if (empty(self::$confChannel['email'])) {
+            return;
+        }
+        foreach (self::$confChannel['email'] as $email) {
+            $headers = 'From: ' . self::$fromNotifier . "\r\n" . 'X-Mailer: PHP/' . phpversion();
+            mail($email, self::$subjNotifier . " {$this->level} {$string}", print_r($this->obj, true), $headers);
+        }
+    }
+
     /**
      * Set path to log folder
      * @param string $path
@@ -196,6 +241,32 @@ class Printu {
         return true;
     }
 
+    /**
+     * Set Notifier configuration
+     */
+    public static function setConfNotifier(array $conf): bool {
+        foreach (self::$confNotifier as $key => $value) {
+            if (array_key_exists($key, $conf) && in_array($conf[$key], self::$availableChannel)) {
+                self::$confNotifier[$key] = $conf[$key];
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Set Channels configuration
+     *  Keys:
+     *      email: ['some@email.com', 'another@email.com', ]
+     */
+    public static function setConfChannel(array $conf): bool {
+        foreach ($conf as $key => $value) {
+            if (in_array($key, self::$availableChannel)) {
+                self::$confChannel[$key] = $conf[$key];
+            }
+        }
+        return true;
+    }
+
     public static function setDefaultResponse(string $response): bool {
         if (!in_array($response, static::$responseTypes)) {
             throw new \Exception('Unknown response type: ' . $response . '. Try one of this: ' . implode(', ', static::$responseTypes));
@@ -204,6 +275,50 @@ class Printu {
         return true;
     }
 
+    /**
+     * Logger - Debug method
+     * @param mixed $obj
+     */
+    public static function debug($obj): Printu {
+        $log = new self($obj);
+        $log->level = 'debug';
+        return $log->response('file')->file('debug');
+    }
+
+    /**
+     * Logger - Info method
+     * @param mixed $obj
+     */
+    public static function info($obj): Printu {
+        $log = new self($obj);
+        $log->level = 'info';
+        return $log->dt()->response('file')->file('info');
+    }
+
+    /**
+     * Logger - Warning method
+     * @param mixed $obj
+     */
+    public static function warning($obj): Printu {
+        $log = new self($obj);
+        $log->level = 'warning';
+        return $log->dt()->response('file')->file('warning');
+    }
+
+    /**
+     * Logger - Alert method
+     * @param mixed $obj
+     */
+    public static function alert($obj): Printu {
+        $log = new self($obj);
+        $log->level = 'alert';
+        return $log->dt()->response('file')->file('alert');
+    }
+
+    /**
+     * Logger base method
+     * @param mixed $obj
+     */
     public static function obj($obj): Printu {
         return new self($obj);
     }
