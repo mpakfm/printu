@@ -52,6 +52,9 @@ class Printu {
     /** @var string */
     protected $level;
 
+    /** @var bool */
+    protected $isDating;
+
     /** @var mixed */
     private $obj;
 
@@ -86,7 +89,8 @@ class Printu {
         if (is_string($obj) && $obj == '') {
             $obj = 'EMPTY LINE (string)';
         }
-        $this->obj = $obj;
+        $this->obj      = $obj;
+        $this->isDating = false;
     }
 
     public function __destruct() {
@@ -107,6 +111,11 @@ class Printu {
         } else {
             $this->dt = new \DateTimeImmutable();
         }
+        return $this;
+    }
+
+    public function dating() {
+        $this->isDating = true;
         return $this;
     }
 
@@ -179,6 +188,10 @@ class Printu {
                 $string .= print_r($this->obj, true)."\n";
                 if (!$this->file) {
                     $this->file = 'info.log';
+                }
+                if ($this->isDating) {
+                    $dt         = new \DateTime();
+                    $this->file = $dt->format('d-m-Y-') . $this->file;
                 }
                 $filePath = static::$logPath . DIRECTORY_SEPARATOR . $this->file;
                 if (static::$logPath) {
